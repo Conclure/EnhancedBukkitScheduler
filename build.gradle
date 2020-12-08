@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'me.conclure'
+version '1.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = sourceCompatibility
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
+    api 'org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+publishing {
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://repo.bristermitten.me/repository/maven-releases"
+            def snapshotsRepoUrl = "https://repo.bristermitten.me/repository/maven-snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username project.hasProperty('mavenUser') ? mavenUser : System.getenv('MAVEN_USER')
+                password project.hasProperty('mavenPassword') ? mavenPassword : System.getenv('MAVEN_PASSWORD')
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+        }
+    }
+}
